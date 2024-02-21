@@ -3,20 +3,22 @@ package io.sapl.assertj;
 import static io.sapl.assertj.IsVal.val;
 import static io.sapl.assertj.IsVal.valFalse;
 import static io.sapl.assertj.IsVal.valTrue;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.sapl.api.interpreter.Val;
+import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 
 class IsValTests {
 	
     private static final Val VALUE = Val.of("test value");
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Test
     void testTypeError() {
@@ -50,48 +52,55 @@ class IsValTests {
 
     @Test
     void testText() {
-    	Val sut = Val.of("XXX");
-        assertThat(sut.getJsonNode().asText()).isEqualTo("XXX");
+    	JsonNode node = mapper.valueToTree("XXX");
+        Val sut = Val.of(node);
+        JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo("XXX");
     }
 
     @Test
     void testInt() {
-    	Val sut = Val.of(JsonNodeFactory.instance.numberNode(1));
-       assertThat(sut.getJsonNode().asInt()).isEqualTo(1);
+    	JsonNode node = mapper.valueToTree(1);
+    	Val sut = Val.of(node);
+    	JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(1);
     }
     
 
     @Test
     void testLong() {
-    	Val sut = Val.of(JsonNodeFactory.instance.numberNode(2L));
-        assertThat(sut.getJsonNode().asLong()).isEqualTo(2L);
+    	JsonNode node = mapper.valueToTree(2L);
+    	Val sut = Val.of(node);
+    	JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(2L);
     }
 
     @Test
     void testDouble() {
-    	Val sut = Val.of(JsonNodeFactory.instance.numberNode(2.0D));
-        assertThat(sut.getJsonNode().asDouble()).isEqualTo(2.0D);
+    	JsonNode node = mapper.valueToTree(2.0D);
+    	Val sut = Val.of(node);
+    	JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(2.0D);
         
     }
 
     @Test
     void testFloat() {
-    	Val sut = Val.of(JsonNodeFactory.instance.numberNode(3.0F));
-        assertThat(sut.getJsonNode().floatValue()).isEqualTo(3.0F);
+    	JsonNode node = mapper.valueToTree(3.0F);
+    	Val sut = Val.of(node);
+    	JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(3.0F);
         
     }
 
     @Test
     void testBigDecimal() {
-    	Val sut = Val.of(JsonNodeFactory.instance.numberNode(3.12D));
-        assertThat(sut.getJsonNode().decimalValue()).isEqualTo(BigDecimal.valueOf(3.12D));
+    	JsonNode node = mapper.valueToTree(new BigDecimal("3.12"));
+        Val sut = Val.of(node);
+        JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(new BigDecimal("3.12"));
         
     }
 
     @Test
     void testBigInteger() {
-    	Val sut = Val.of(JsonNodeFactory.instance.numberNode(3L));
-       assertThat(sut.getJsonNode().bigIntegerValue()).isEqualTo(BigInteger.valueOf(3L));
+    	JsonNode node = mapper.valueToTree(new BigInteger("3"));
+        Val sut = Val.of(node);
+        JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(new BigInteger("3"));
      
     }
 

@@ -9,7 +9,7 @@ import io.sapl.api.interpreter.Val;
 
 public class IsVal extends AbstractAssert<IsVal, Val> {
 
-	    protected IsVal(Val actual) {
+	    public IsVal(Val actual) {
 	        super(actual, IsVal.class);
 	    }
 	    public static IsVal assertThatVal(Val actual) {
@@ -61,5 +61,5 @@ public class IsVal extends AbstractAssert<IsVal, Val> {
 	    public static Val valNull() {
 	        return Val.NULL;
 	    }
-
+	    
 	}
