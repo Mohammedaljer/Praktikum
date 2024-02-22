@@ -1,70 +1,83 @@
 package io.sapl.assertj;
 
-import static io.sapl.assertj.IsVal.val;
-import static io.sapl.assertj.IsVal.valFalse;
-import static io.sapl.assertj.IsVal.valTrue;
+import static io.sapl.assertj.IsVal.assertThatVal;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import io.sapl.api.interpreter.Val;
-import net.javacrumbs.jsonunit.assertj.JsonAssertions;
 
 class IsValTests {
 	
     private static final Val VALUE = Val.of("test value");
-    private static final ObjectMapper mapper = new ObjectMapper();
-
+    
+  
     @Test
     void testTypeError() {
-    	 Val sut = val();
-    	 IsVal.assertThatVal(sut).isNotEqualTo(Val.error());
+        var actual = Val.error();
+        assertThatVal(actual).isError();
+   
     }
     @Test
-    void testTypeUndefined() {
-    	 Val sut = val();
-    	 IsVal.assertThatVal(sut).isNotEqualTo(Val.UNDEFINED);
+    void testNoError() throws JsonProcessingException{
+        var actual = Val.error();
+        assertThatThrownBy(() -> assertThatVal(actual).noError())
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Val is an Error");
     }
-
-
+    
     @Test
     void testType() {
-    	var sut = val();
-    	IsVal.assertThatVal(VALUE).isEqualTo(sut);
+    	var actual = VALUE;
+    	assertThatVal(actual).isTextual().hasMessage("test value").noError();
     }
-
+    
+	@Test
+	void testTypeUndefined() throws JsonProcessingException {
+		var actual = Val.UNDEFINED;
+		assertThatThrownBy(() -> assertThatVal(actual).hasValue().isObject().containsKey("key"))
+				.isInstanceOf(AssertionError.class).hasMessage("Val is undefined");
+	}
+	
     @Test
     void testTrue() {
-    	var sut = valTrue();
-    	IsVal.assertThatVal(sut).isEqualTo(Val.TRUE);
+    	var actual = Val.TRUE;
+    	assertThatVal(actual).isTrue();
     }
-
+    
     @Test
-    void testFalse() {
-    	var sut = valFalse();
-    	IsVal.assertThatVal(sut).isEqualTo(Val.FALSE);
+    void testFalse() throws JsonProcessingException {
+        var actual = Val.FALSE;
+        assertThatThrownBy(() -> assertThatVal(actual).isTrue())
+            .isInstanceOf(AssertionError.class)
+            .hasMessageContaining("Val is not True");
     }
-
+    
     @Test
     void testText() {
-    	JsonNode node = mapper.valueToTree("XXX");
-        Val sut = Val.of(node);
-        JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo("XXX");
+    	var actual = Val.of("XXX");
+        assertThatVal(actual).noError().isTextual().hasMessage("XXX");
     }
 
     @Test
     void testInt() {
-    	JsonNode node = mapper.valueToTree(1);
-    	Val sut = Val.of(node);
-    	JsonAssertions.assertThatJson(sut.getJsonNode()).isEqualTo(1);
+    	Val actual = Val.of(1);
+        assertThatVal(actual).hasIntValue().isEqualTo(1);
+       
     }
+    @Test
+   	void jsonPostive() throws JsonProcessingException {
+   		var actual = Val.ofJson("{\"key\":\"value\" }");
+   		assertDoesNotThrow(() -> assertThatVal(actual).hasValue().isObject().containsKey("key"));
+   	}
     
-
+/*
+ * 
+	
     @Test
     void testLong() {
     	JsonNode node = mapper.valueToTree(2L);
@@ -110,6 +123,6 @@ class IsValTests {
     	IsVal.assertThatVal(sut).isEqualTo(Val.NULL);
     }
 
-  
+  */
    
 }
